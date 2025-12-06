@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Мое приложение</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #667eea;
+            color: white;
+            text-align: center;
+        }
+        button {
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Привет из приложения!</h1>
+    <button onclick="sendData()">Отправить "Привет"</button>
+    <button onclick="Telegram.WebApp.close()">Закрыть</button>
+
+    <script>
+        Telegram.WebApp.ready();
+
+        function sendData() {
+            Telegram.WebApp.sendData(JSON.stringify({
+                message: "Привет от мини-приложения!",
+                time: new Date().toLocaleTimeString()
+            }));
+            Telegram.WebApp.showAlert("Отправлено!");
+        }
+    </script>
+</body>
+</html>
