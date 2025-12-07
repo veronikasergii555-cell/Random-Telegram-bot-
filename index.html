@@ -20,85 +20,128 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Arial', sans-serif;
-            overflow: hidden;
             padding: 10px;
         }
 
         .game-container {
             width: 100%;
             max-width: 500px;
-            padding: 20px;
         }
 
-        /* Три горизонтальные дорожки */
+        /* Заголовок */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            color: #FF6600;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: rgba(255, 102, 0, 0.7);
+            font-size: 14px;
+        }
+
+        /* Дорожки */
+        .track-container {
+            margin-bottom: 30px;
+        }
+
         .track {
-            height: 100px;
-            margin-bottom: 15px;
+            height: 120px;
+            margin-bottom: 20px;
             position: relative;
             display: flex;
             align-items: center;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 102, 0, 0.2);
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            overflow: visible;
         }
 
-        /* Светящаяся траектория */
+        /* Фрукт слева (иконка) */
+        .fruit-icon {
+            position: absolute;
+            left: 25px;
+            font-size: 40px;
+            z-index: 1;
+            filter: drop-shadow(0 0 5px rgba(255, 102, 0, 0.5));
+        }
+
+        /* Трек-линия */
         .track-line {
             position: absolute;
-            left: 70px;
-            right: 70px;
-            height: 4px;
-            background: linear-gradient(90deg, #FF6600, #FF8C00);
-            border-radius: 2px;
-            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5),
-                        0 0 20px rgba(255, 102, 0, 0.3);
+            left: 80px;
+            right: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(255, 102, 0, 0.3), 
+                rgba(255, 102, 0, 0.6), 
+                rgba(255, 102, 0, 0.3));
             z-index: 1;
         }
 
-        /* Круг под фрукт */
-        .fruit-circle {
-            width: 70px;
-            height: 70px;
+        /* Бегунок (кружок с фруктом) */
+        .slider-circle {
+            position: absolute;
+            left: 80px;
+            width: 50px;
+            height: 50px;
             background-color: #000000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 15px;
             border: 2px solid #FF6600;
-            box-shadow: 0 0 15px rgba(255, 102, 0, 0.4),
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.5),
+                        0 0 30px rgba(255, 102, 0, 0.3),
                         inset 0 0 10px rgba(255, 102, 0, 0.2);
-            z-index: 2;
-        }
-
-        .fruit {
-            font-size: 40px;
+            z-index: 10;
             cursor: grab;
             transition: all 0.2s;
-            filter: drop-shadow(0 0 5px rgba(255, 102, 0, 0.5));
         }
 
-        .fruit.dragging {
+        .slider-circle.dragging {
             cursor: grabbing;
+            border-color: #FF8C00;
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.8),
+                        0 0 40px rgba(255, 102, 0, 0.5),
+                        inset 0 0 15px rgba(255, 102, 0, 0.3);
             transform: scale(1.1);
-            filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.8));
+        }
+
+        .slider-fruit {
+            font-size: 24px;
+            filter: drop-shadow(0 0 5px rgba(255, 102, 0, 0.7));
         }
 
         /* Корзина справа */
         .basket {
-            width: 60px;
-            height: 60px;
-            margin-right: 25px;
+            position: absolute;
+            right: 25px;
+            width: 70px;
+            height: 70px;
+            background-color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #000000;
+            border: 2px solid rgba(255, 102, 0, 0.5);
             border-radius: 10px;
-            border: 2px solid #FF6600;
-            box-shadow: 0 0 15px rgba(255, 102, 0, 0.4),
-                        inset 0 0 10px rgba(255, 102, 0, 0.2);
-            z-index: 2;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.3),
+                        inset 0 0 8px rgba(255, 102, 0, 0.1);
+            z-index: 1;
+        }
+
+        .basket.active {
+            border-color: #FF6600;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.6),
+                        inset 0 0 12px rgba(255, 102, 0, 0.2);
+            animation: basketPulse 1.5s infinite;
         }
 
         .basket-icon {
@@ -106,51 +149,38 @@
             opacity: 0.7;
         }
 
-        /* Подсветка при наведении */
-        .basket.active {
-            border-color: #FF8C00;
-            box-shadow: 0 0 20px rgba(255, 102, 0, 0.8),
-                        inset 0 0 15px rgba(255, 102, 0, 0.3);
-        }
-
-        .basket-icon.active {
+        .basket.active .basket-icon {
             opacity: 1;
-            text-shadow: 0 0 10px rgba(255, 102, 0, 0.8);
+            text-shadow: 0 0 8px rgba(255, 102, 0, 0.8);
         }
 
-        /* Линия пути при перетаскивании */
-        .drag-line {
-            position: absolute;
-            height: 6px;
-            background: linear-gradient(90deg, #FF6600, transparent);
-            border-radius: 3px;
-            z-index: 1;
-            opacity: 0;
-            pointer-events: none;
+        @keyframes basketPulse {
+            0% { box-shadow: 0 0 10px rgba(255, 102, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 102, 0, 0.6); }
+            100% { box-shadow: 0 0 10px rgba(255, 102, 0, 0.3); }
         }
 
-        /* Прогресс бар */
+        /* Прогресс */
         .progress-container {
-            margin-top: 30px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid rgba(255, 102, 0, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 102, 0, 0.3);
         }
 
         .progress-text {
             color: #FF6600;
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
             text-align: center;
             text-shadow: 0 0 5px rgba(255, 102, 0, 0.5);
             font-weight: bold;
         }
 
         .progress-bar {
-            height: 10px;
-            background: rgba(255, 102, 0, 0.2);
-            border-radius: 5px;
+            height: 8px;
+            background: rgba(255, 102, 0, 0.15);
+            border-radius: 4px;
             overflow: hidden;
         }
 
@@ -158,88 +188,101 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #FF6600, #FF8C00);
-            border-radius: 5px;
-            transition: width 0.3s ease;
+            border-radius: 4px;
+            transition: width 0.5s ease;
             box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
         }
 
-        /* Иконки дорожек */
-        .track-icon {
-            position: absolute;
-            left: 10px;
-            font-size: 24px;
-            color: #FF6600;
-            opacity: 0.5;
+        /* Завершенные дорожки */
+        .track.completed .slider-circle {
+            border-color: #00FF00;
+            background-color: #001a00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4),
+                        0 0 30px rgba(0, 255, 0, 0.2),
+                        inset 0 0 10px rgba(0, 255, 0, 0.3);
         }
 
-        /* Эффект завершения */
         .track.completed .track-line {
-            background: linear-gradient(90deg, #00FF00, #00CC00);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5),
-                        0 0 20px rgba(0, 255, 0, 0.3);
+            background: linear-gradient(90deg, 
+                rgba(0, 255, 0, 0.3), 
+                rgba(0, 255, 0, 0.6), 
+                rgba(0, 255, 0, 0.3));
         }
 
-        .track.completed .fruit-circle,
         .track.completed .basket {
             border-color: #00FF00;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4),
+                        inset 0 0 12px rgba(0, 255, 0, 0.2);
         }
 
-        .track.completed .fruit {
-            opacity: 0.4;
-            cursor: default;
+        /* Подсказка */
+        .hint {
+            color: rgba(255, 102, 0, 0.6);
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
         }
 
-        /* Анимация пульсации для активной дорожки */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 10px rgba(255, 102, 0, 0.4); }
-            50% { box-shadow: 0 0 20px rgba(255, 102, 0, 0.8); }
-            100% { box-shadow: 0 0 10px rgba(255, 102, 0, 0.4); }
+        /* Анимация успеха */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .track.active {
-            animation: pulse 2s infinite;
+        .track.completed {
+            animation: successPulse 0.5s ease;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <!-- Дорожка 1: Яблоко -->
-        <div class="track" id="track1" data-fruit="🍎">
-            <div class="track-icon">🍎</div>
-            <div class="fruit-circle">
-                <div class="fruit" id="fruit1">🍎</div>
-            </div>
-            <div class="track-line"></div>
-            <div class="drag-line" id="dragLine1"></div>
-            <div class="basket" id="basket1">
-                <div class="basket-icon">🍎</div>
-            </div>
+        <!-- Заголовок -->
+        <div class="header">
+            <div class="title">ПЕРЕТАЩИ ФРУКТ</div>
+            <div class="subtitle">Перетащи кружок с фруктом в корзину</div>
         </div>
 
-        <!-- Дорожка 2: Банан -->
-        <div class="track" id="track2" data-fruit="🍌">
-            <div class="track-icon">🍌</div>
-            <div class="fruit-circle">
-                <div class="fruit" id="fruit2">🍌</div>
+        <!-- Дорожки -->
+        <div class="track-container">
+            <!-- Дорожка 1: Яблоко -->
+            <div class="track" id="track1" data-fruit="🍎">
+                <div class="fruit-icon">🍎</div>
+                <div class="track-line"></div>
+                <div class="slider-circle" id="slider1">
+                    <div class="slider-fruit">🍎</div>
+                </div>
+                <div class="basket" id="basket1">
+                    <div class="basket-icon">🍎</div>
+                </div>
+                <div class="hint">Проведите кружок с яблоком в корзину</div>
             </div>
-            <div class="track-line"></div>
-            <div class="drag-line" id="dragLine2"></div>
-            <div class="basket" id="basket2">
-                <div class="basket-icon">🍌</div>
-            </div>
-        </div>
 
-        <!-- Дорожка 3: Виноград -->
-        <div class="track" id="track3" data-fruit="🍇">
-            <div class="track-icon">🍇</div>
-            <div class="fruit-circle">
-                <div class="fruit" id="fruit3">🍇</div>
+            <!-- Дорожка 2: Банан -->
+            <div class="track" id="track2" data-fruit="🍌">
+                <div class="fruit-icon">🍌</div>
+                <div class="track-line"></div>
+                <div class="slider-circle" id="slider2">
+                    <div class="slider-fruit">🍌</div>
+                </div>
+                <div class="basket" id="basket2">
+                    <div class="basket-icon">🍌</div>
+                </div>
+                <div class="hint">Проведите кружок с бананом в корзину</div>
             </div>
-            <div class="track-line"></div>
-            <div class="drag-line" id="dragLine3"></div>
-            <div class="basket" id="basket3">
-                <div class="basket-icon">🍇</div>
+
+            <!-- Дорожка 3: Виноград -->
+            <div class="track" id="track3" data-fruit="🍇">
+                <div class="fruit-icon">🍇</div>
+                <div class="track-line"></div>
+                <div class="slider-circle" id="slider3">
+                    <div class="slider-fruit">🍇</div>
+                </div>
+                <div class="basket" id="basket3">
+                    <div class="basket-icon">🍇</div>
+                </div>
+                <div class="hint">Проведите кружок с виноградом в корзину</div>
             </div>
         </div>
 
@@ -261,35 +304,34 @@
             let completedTracks = 0;
             const totalTracks = 3;
             let isDragging = false;
-            let currentFruit = null;
-            let currentDragLine = null;
-            let currentBasket = null;
-            let startX = 0;
-            let startY = 0;
-            let fruitOffsetX = 0;
-            let fruitOffsetY = 0;
+            let currentSlider = null;
             let currentTrack = null;
+            let startX = 0;
+            let currentBasket = null;
+            let trackLine = null;
+            let trackRect = null;
 
             // Инициализация каждой дорожки
-            tracks.forEach((track, index) => {
-                const fruit = track.querySelector('.fruit');
-                const dragLine = track.querySelector('.drag-line');
+            tracks.forEach((track) => {
+                const slider = track.querySelector('.slider-circle');
                 const basket = track.querySelector('.basket');
-                const fruitCircle = track.querySelector('.fruit-circle');
                 
-                // Получаем начальные координаты фрукта
-                const rect = fruitCircle.getBoundingClientRect();
-                fruit.dataset.originalLeft = rect.left;
-                fruit.dataset.originalTop = rect.top;
+                // Сохраняем начальную позицию слайдера
+                const sliderRect = slider.getBoundingClientRect();
+                const trackRect = track.getBoundingClientRect();
+                const trackLine = track.querySelector('.track-line');
+                const lineRect = trackLine.getBoundingClientRect();
+                
+                // Позиция слайдера на трек-линии
+                const initialLeft = lineRect.left - trackRect.left;
+                slider.dataset.initialLeft = initialLeft;
+                slider.style.left = `${initialLeft}px`;
                 
                 // События для мыши
-                fruit.addEventListener('mousedown', startDrag);
-                fruit.addEventListener('touchstart', handleTouchStart);
+                slider.addEventListener('mousedown', startDrag);
                 
-                // События для всей дорожки (если отпустили вне фрукта)
-                track.addEventListener('mouseup', stopDrag);
-                track.addEventListener('touchend', handleTouchEnd);
-                track.addEventListener('touchcancel', handleTouchEnd);
+                // События для сенсорных устройств
+                slider.addEventListener('touchstart', handleTouchStart);
             });
 
             // События для документа
@@ -300,38 +342,30 @@
                 e.preventDefault();
                 if (isDragging) return;
                 
-                currentFruit = e.target;
-                currentTrack = currentFruit.closest('.track');
+                currentSlider = e.target.closest('.slider-circle');
+                currentTrack = currentSlider.closest('.track');
                 
                 // Если дорожка уже завершена - не даем тащить
                 if (currentTrack.classList.contains('completed')) return;
                 
                 isDragging = true;
-                currentFruit.classList.add('dragging');
-                currentTrack.classList.add('active');
+                currentSlider.classList.add('dragging');
                 
-                currentDragLine = currentTrack.querySelector('.drag-line');
                 currentBasket = currentTrack.querySelector('.basket');
+                trackLine = currentTrack.querySelector('.track-line');
                 
                 // Получаем начальные координаты
-                let clientX, clientY;
+                let clientX;
                 if (e.type === 'mousedown') {
                     clientX = e.clientX;
-                    clientY = e.clientY;
                 } else {
                     clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
                 }
                 
-                const fruitRect = currentFruit.getBoundingClientRect();
-                startX = fruitRect.left;
-                startY = fruitRect.top;
-                fruitOffsetX = clientX - startX;
-                fruitOffsetY = clientY - startY;
+                const sliderRect = currentSlider.getBoundingClientRect();
+                startX = clientX - sliderRect.left;
                 
-                // Показываем линию
-                currentDragLine.style.opacity = '1';
-                updateDragLine(clientX, clientY);
+                trackRect = currentTrack.getBoundingClientRect();
             }
 
             function handleTouchStart(e) {
@@ -340,50 +374,33 @@
             }
 
             function drag(e) {
-                if (!isDragging || !currentFruit) return;
+                if (!isDragging || !currentSlider) return;
                 
-                let clientX, clientY;
+                let clientX;
                 if (e.type === 'mousemove') {
                     clientX = e.clientX;
-                    clientY = e.clientY;
                 } else if (e.touches) {
                     clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
                 } else {
                     return;
                 }
                 
-                // Получаем границы дорожки
-                const trackRect = currentTrack.getBoundingClientRect();
-                const fruitRect = currentFruit.getBoundingClientRect();
+                // Получаем границы трек-линии
+                const lineRect = trackLine.getBoundingClientRect();
                 
-                // Ограничиваем движение только в пределах дорожки
-                const minX = trackRect.left + 15;
-                const maxX = trackRect.right - 15 - fruitRect.width;
-                const minY = trackRect.top;
-                const maxY = trackRect.bottom - fruitRect.height;
+                // Ограничиваем движение только в пределах трек-линии
+                const minX = lineRect.left - trackRect.left;
+                const maxX = lineRect.right - trackRect.left - currentSlider.offsetWidth;
                 
-                // Вычисляем новую позицию
-                let newX = clientX - fruitOffsetX;
-                let newY = clientY - fruitOffsetY;
-                
-                // Ограничиваем по Y (оставляем только горизонтальное движение)
-                newY = Math.max(minY, Math.min(newY, maxY));
-                
-                // Разрешаем движение только вправо от начальной позиции
-                newX = Math.max(startX, Math.min(newX, maxX));
+                // Вычисляем новую позицию слайдера
+                let newX = clientX - startX - trackRect.left;
+                newX = Math.max(minX, Math.min(newX, maxX));
                 
                 // Применяем новую позицию
-                currentFruit.style.position = 'fixed';
-                currentFruit.style.left = `${newX}px`;
-                currentFruit.style.top = `${newY}px`;
-                currentFruit.style.zIndex = '1000';
+                currentSlider.style.left = `${newX}px`;
                 
-                // Обновляем линию перетаскивания
-                updateDragLine(clientX, clientY);
-                
-                // Проверяем, находимся ли над корзиной
-                checkBasketOverlap(clientX, clientY);
+                // Проверяем, близко ли к корзине
+                checkBasketProximity(newX, lineRect);
             }
 
             function handleTouchMove(e) {
@@ -397,87 +414,55 @@
             }
 
             function stopDrag(e) {
-                if (!isDragging || !currentFruit) return;
+                if (!isDragging || !currentSlider) return;
                 
                 isDragging = false;
-                currentFruit.classList.remove('dragging');
-                if (currentTrack) {
-                    currentTrack.classList.remove('active');
-                }
+                currentSlider.classList.remove('dragging');
                 
-                // Проверяем, попали ли в корзину
-                const fruitRect = currentFruit.getBoundingClientRect();
+                // Получаем текущую позицию слайдера
+                const sliderRect = currentSlider.getBoundingClientRect();
                 const basketRect = currentBasket.getBoundingClientRect();
                 
-                // Проверяем пересечение фрукта с корзиной
-                const isInBasket = 
-                    fruitRect.left < basketRect.right &&
-                    fruitRect.right > basketRect.left &&
-                    fruitRect.top < basketRect.bottom &&
-                    fruitRect.bottom > basketRect.top;
+                // Проверяем, достиг ли слайдер корзины
+                // Корзина считается достигнутой, когда слайдер заходит в её область
+                const isAtBasket = 
+                    sliderRect.right >= basketRect.left + 20 &&
+                    sliderRect.left <= basketRect.right - 20;
                 
-                if (isInBasket) {
-                    // Успех! Фрукт в корзине
+                if (isAtBasket) {
+                    // Успех! Слайдер в корзине
                     completeTrack();
                 } else {
-                    // Возвращаем фрукт на место
-                    returnFruit();
-                }
-                
-                // Скрываем линию
-                if (currentDragLine) {
-                    currentDragLine.style.opacity = '0';
-                    currentDragLine.style.width = '0';
+                    // Возвращаем слайдер на начальную позицию
+                    returnSlider();
                 }
                 
                 // Убираем подсветку корзины
                 if (currentBasket) {
                     currentBasket.classList.remove('active');
-                    currentBasket.querySelector('.basket-icon').classList.remove('active');
                 }
                 
-                currentFruit = null;
-                currentDragLine = null;
-                currentBasket = null;
+                currentSlider = null;
                 currentTrack = null;
+                currentBasket = null;
+                trackLine = null;
             }
 
-            function updateDragLine(clientX, clientY) {
-                if (!currentDragLine || !currentFruit) return;
+            function checkBasketProximity(sliderX, lineRect) {
+                if (!currentBasket) return;
                 
-                const fruitRect = currentFruit.getBoundingClientRect();
-                const fruitCenterX = fruitRect.left + fruitRect.width / 2;
-                const fruitCenterY = fruitRect.top + fruitRect.height / 2;
-                
-                const trackRect = currentTrack.getBoundingClientRect();
-                const trackCenterY = trackRect.top + trackRect.height / 2;
-                
-                // Длина линии от центра фрукта до текущей позиции курсора
-                const length = Math.max(0, clientX - fruitCenterX);
-                
-                currentDragLine.style.left = `${fruitCenterX - trackRect.left}px`;
-                currentDragLine.style.top = `${trackCenterY - 3 - trackRect.top}px`;
-                currentDragLine.style.width = `${length}px`;
-            }
-
-            function checkBasketOverlap(clientX, clientY) {
-                if (!currentBasket || !currentFruit) return;
-                
+                // Получаем позицию корзины относительно трека
                 const basketRect = currentBasket.getBoundingClientRect();
-                const fruitRect = currentFruit.getBoundingClientRect();
+                const basketTrackX = basketRect.left - trackRect.left;
                 
-                // Если фрукт достаточно близко к корзине
-                const distance = Math.sqrt(
-                    Math.pow(clientX - (basketRect.left + basketRect.width/2), 2) +
-                    Math.pow(clientY - (basketRect.top + basketRect.height/2), 2)
-                );
+                // Расстояние от правого края слайдера до левого края корзины
+                const distanceToBasket = basketTrackX - (sliderX + currentSlider.offsetWidth);
                 
-                if (distance < 100) { // 100px радиус срабатывания
+                // Если слайдер близко к корзине (менее 20px), подсвечиваем корзину
+                if (distanceToBasket < 20 && distanceToBasket > -10) {
                     currentBasket.classList.add('active');
-                    currentBasket.querySelector('.basket-icon').classList.add('active');
                 } else {
                     currentBasket.classList.remove('active');
-                    currentBasket.querySelector('.basket-icon').classList.remove('active');
                 }
             }
 
@@ -485,13 +470,13 @@
                 // Помечаем дорожку как завершенную
                 currentTrack.classList.add('completed');
                 
-                // Позиционируем фрукт в корзине
+                // Позиционируем слайдер точно в корзине
                 const basketRect = currentBasket.getBoundingClientRect();
-                currentFruit.style.left = `${basketRect.left + 10}px`;
-                currentFruit.style.top = `${basketRect.top + 10}px`;
-                currentFruit.style.transform = 'scale(0.8)';
-                currentFruit.style.opacity = '0.7';
-                currentFruit.style.cursor = 'default';
+                const basketTrackX = basketRect.left - trackRect.left;
+                const centerBasketX = basketTrackX + basketRect.width/2 - currentSlider.offsetWidth/2;
+                
+                currentSlider.style.left = `${centerBasketX}px`;
+                currentSlider.style.transition = 'left 0.3s ease';
                 
                 // Увеличиваем счетчик завершенных дорожек
                 completedTracks++;
@@ -513,24 +498,17 @@
                 }
             }
 
-            function returnFruit() {
-                // Возвращаем фрукт в исходное положение
-                const originalLeft = parseFloat(currentFruit.dataset.originalLeft);
-                const originalTop = parseFloat(currentFruit.dataset.originalTop);
+            function returnSlider() {
+                // Возвращаем слайдер на начальную позицию
+                const initialLeft = parseFloat(currentSlider.dataset.initialLeft);
                 
-                currentFruit.style.transition = 'all 0.3s ease';
-                currentFruit.style.left = `${originalLeft}px`;
-                currentFruit.style.top = `${originalTop}px`;
+                currentSlider.style.transition = 'left 0.3s ease';
+                currentSlider.style.left = `${initialLeft}px`;
                 
                 // Через короткое время убираем transition
                 setTimeout(() => {
-                    if (currentFruit) {
-                        currentFruit.style.transition = '';
-                        currentFruit.style.position = '';
-                        currentFruit.style.left = '';
-                        currentFruit.style.top = '';
-                        currentFruit.style.zIndex = '';
-                        currentFruit.style.transform = '';
+                    if (currentSlider) {
+                        currentSlider.style.transition = '';
                     }
                 }, 300);
             }
@@ -544,6 +522,7 @@
             // Добавляем обработчики для touch событий
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd);
+            document.addEventListener('touchcancel', handleTouchEnd);
         });
     </script>
 </body>
