@@ -143,23 +143,23 @@
         /* Анимация поглощения кружка */
         @keyframes absorb {
             0% {
-                transform: scale(1) translateX(0);
+                transform: scale(1);
                 opacity: 1;
             }
             50% {
-                transform: scale(1.2) translateX(0);
-                opacity: 0.8;
+                transform: scale(1.3);
+                opacity: 0.7;
                 border-color: #00FF00;
             }
             100% {
-                transform: scale(0) translateX(0);
+                transform: scale(0);
                 opacity: 0;
                 border-color: #00FF00;
             }
         }
 
         .fruit-circle.absorbed {
-            animation: absorb 0.6s ease forwards;
+            animation: absorb 0.8s ease forwards;
             pointer-events: none;
         }
 
@@ -232,27 +232,6 @@
             transition: width 0.5s ease;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
-
-        /* Эффект пульсации для активного блока */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
-            50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
-        }
-
-        .track-block.active {
-            animation: pulse 2s infinite;
-        }
-
-        /* Зона поглощения - больше чем квадрат для удобства */
-        .absorption-zone {
-            position: absolute;
-            right: 40px;
-            width: 80px;
-            height: 80px;
-            z-index: 15;
-            /* border: 1px dashed rgba(0, 255, 0, 0.3); Для отладки */
-        }
     </style>
 </head>
 <body>
@@ -270,7 +249,6 @@
                 <div class="fruit-circle" id="circle1">
                     <div class="fruit">🍎</div>
                 </div>
-                <div class="absorption-zone" id="zone1"></div>
                 <div class="target-square" id="target1">
                     <div class="target-icon">🍎</div>
                 </div>
@@ -282,7 +260,6 @@
                 <div class="fruit-circle" id="circle2">
                     <div class="fruit">🍌</div>
                 </div>
-                <div class="absorption-zone" id="zone2"></div>
                 <div class="target-square" id="target2">
                     <div class="target-icon">🍌</div>
                 </div>
@@ -294,7 +271,6 @@
                 <div class="fruit-circle" id="circle3">
                     <div class="fruit">🍇</div>
                 </div>
-                <div class="absorption-zone" id="zone3"></div>
                 <div class="target-square" id="target3">
                     <div class="target-icon">🍇</div>
                 </div>
@@ -322,17 +298,14 @@
             let currentCircle = null;
             let currentTrack = null;
             let currentTarget = null;
-            let absorptionZone = null;
-            let trackLine = null;
             let trackRect = null;
             let startX = 0;
-            let initialLeft = 0;
+            let startCircleLeft = 0;
 
             // Инициализация каждой дорожки
             tracks.forEach((track) => {
                 const circle = track.querySelector('.fruit-circle');
                 const target = track.querySelector('.target-square');
-                const zone = track.querySelector('.absorption-zone');
                 
                 // Сохраняем начальную позицию кружочка
                 circle.dataset.initialLeft = '50';
@@ -342,7 +315,7 @@
                 circle.addEventListener('mousedown', startDrag);
                 
                 // События для сенсорных устройств
-                circle.addEventListener('touchstart', handleTouchStart);
+                circle.addEventListener('touchstart', handleTouchStart, { passive: false });
             });
 
             // События для документа
@@ -363,8 +336,7 @@
                 currentCircle.classList.add('dragging');
                 
                 currentTarget = currentTrack.querySelector('.target-square');
-                absorptionZone = currentTrack.querySelector('.absorption-zone');
-                trackLine = currentTrack.querySelector('.track-line');
+                trackRect = currentTrack.getBoundingClientRect();
                 
                 // Получаем начальные координаты
                 let clientX;
@@ -375,10 +347,8 @@
                 }
                 
                 const circleRect = currentCircle.getBoundingClientRect();
-                startX = clientX - circleRect.left;
-                initialLeft = parseInt(currentCircle.style.left);
-                
-                trackRect = currentTrack.getBoundingClientRect();
+                startX = clientX;
+                startCircleLeft = parseInt(currentCircle.style.left);
             }
 
             function handleTouchStart(e) {
@@ -394,26 +364,28 @@
                     clientX = e.clientX;
                 } else if (e.touches) {
                     clientX = e.touches[0].clientX;
+                    e.preventDefault();
                 } else {
                     return;
                 }
                 
-                // Получаем границы трек-линии
-                const lineRect = trackLine.getBoundingClientRect();
-                
-                // Ограничиваем движение только в пределах трек-линии
-                const minX = 50; // Начальная позиция
-                const maxX = lineRect.right - trackRect.left - currentCircle.offsetWidth;
+                // Вычисляем смещение
+                const deltaX = clientX - startX;
                 
                 // Вычисляем новую позицию кружочка
-                let newX = clientX - startX - trackRect.left + initialLeft;
+                let newX = startCircleLeft + deltaX;
+                
+                // Ограничиваем движение в пределах дорожки (но разрешаем выходить за трек-линию)
+                const minX = 0; // Может уходить влево
+                const maxX = trackRect.width - currentCircle.offsetWidth; // Может доходить до правого края
+                
                 newX = Math.max(minX, Math.min(newX, maxX));
                 
                 // Применяем новую позицию
                 currentCircle.style.left = `${newX}px`;
                 
-                // Проверяем, близко ли к зоне поглощения
-                checkAbsorptionZone(newX);
+                // Проверяем, находится ли кружок над квадратом
+                checkTargetOverlap(newX);
             }
 
             function handleTouchMove(e) {
@@ -432,19 +404,19 @@
                 isDragging = false;
                 currentCircle.classList.remove('dragging');
                 
-                // Получаем текущую позицию кружочка
+                // Получаем позиции элементов
                 const circleRect = currentCircle.getBoundingClientRect();
-                const zoneRect = absorptionZone.getBoundingClientRect();
+                const targetRect = currentTarget.getBoundingClientRect();
                 
-                // Проверяем, находится ли кружочек в зоне поглощения
-                const isInZone = 
-                    circleRect.left >= zoneRect.left &&
-                    circleRect.right <= zoneRect.right &&
-                    circleRect.top >= zoneRect.top &&
-                    circleRect.bottom <= zoneRect.bottom;
+                // Проверяем пересечение кружка с квадратом
+                const isOverTarget = 
+                    circleRect.left < targetRect.right &&
+                    circleRect.right > targetRect.left &&
+                    circleRect.top < targetRect.bottom &&
+                    circleRect.bottom > targetRect.top;
                 
-                if (isInZone) {
-                    // Успех! Кружочек в зоне поглощения
+                if (isOverTarget) {
+                    // Успех! Кружок над квадратом
                     absorbCircle();
                 } else {
                     // Возвращаем кружочек на начальную позицию
@@ -459,21 +431,22 @@
                 currentCircle = null;
                 currentTrack = null;
                 currentTarget = null;
-                absorptionZone = null;
-                trackLine = null;
+                trackRect = null;
             }
 
-            function checkAbsorptionZone(circleX) {
-                if (!currentTarget || !absorptionZone) return;
+            function checkTargetOverlap(circleX) {
+                if (!currentTarget) return;
                 
-                // Получаем позицию зоны поглощения
-                const zoneRect = absorptionZone.getBoundingClientRect();
+                // Получаем позицию квадрата
+                const targetRect = currentTarget.getBoundingClientRect();
                 const circleRect = currentCircle.getBoundingClientRect();
                 
-                // Проверяем пересечение кружка с зоной поглощения
+                // Проверяем пересечение
                 const isOverlapping = 
-                    circleRect.right > zoneRect.left &&
-                    circleRect.left < zoneRect.right;
+                    circleRect.left < targetRect.right &&
+                    circleRect.right > targetRect.left &&
+                    circleRect.top < targetRect.bottom &&
+                    circleRect.bottom > targetRect.top;
                 
                 if (isOverlapping) {
                     currentTarget.classList.add('highlight');
@@ -483,46 +456,55 @@
             }
 
             function absorbCircle() {
-                // Анимация поглощения кружка
-                currentCircle.classList.add('absorbed');
+                // Сначала центрируем кружок над квадратом
+                const targetRect = currentTarget.getBoundingClientRect();
+                const trackRect = currentTrack.getBoundingClientRect();
+                const targetCenterX = targetRect.left - trackRect.left + targetRect.width/2 - currentCircle.offsetWidth/2;
                 
-                // Помечаем дорожку как завершенную
+                currentCircle.style.transition = 'left 0.3s ease';
+                currentCircle.style.left = `${targetCenterX}px`;
+                
+                // Затем запускаем анимацию поглощения
                 setTimeout(() => {
-                    currentTrack.classList.add('completed');
+                    currentCircle.classList.add('absorbed');
                     
-                    // Увеличиваем счетчик завершенных дорожек
-                    completedTracks++;
-                    
-                    // Обновляем прогресс
-                    updateProgress();
-                    
-                    // Проверяем завершение капчи
-                    if (completedTracks === totalTracks) {
-                        setTimeout(() => {
-                            // Отправляем результат в Telegram Mini App
-                            if (window.Telegram && window.Telegram.WebApp) {
-                                window.Telegram.WebApp.sendData(JSON.stringify({
-                                    captcha_passed: true,
-                                    completed_tracks: completedTracks
-                                }));
-                            }
-                        }, 1000);
-                    }
-                }, 600); // Ждем окончания анимации
+                    // Помечаем дорожку как завершенную
+                    setTimeout(() => {
+                        currentTrack.classList.add('completed');
+                        
+                        // Увеличиваем счетчик завершенных дорожек
+                        completedTracks++;
+                        
+                        // Обновляем прогресс
+                        updateProgress();
+                        
+                        // Проверяем завершение капчи
+                        if (completedTracks === totalTracks) {
+                            setTimeout(() => {
+                                // Отправляем результат в Telegram Mini App
+                                if (window.Telegram && window.Telegram.WebApp) {
+                                    window.Telegram.WebApp.sendData(JSON.stringify({
+                                        captcha_passed: true,
+                                        completed_tracks: completedTracks
+                                    }));
+                                }
+                            }, 1000);
+                        }
+                    }, 800); // Ждем окончания анимации
+                }, 300);
             }
 
             function returnCircle() {
                 // Возвращаем кружочек на начальную позицию
-                currentCircle.style.transition = 'left 0.3s ease, transform 0.3s ease';
+                currentCircle.style.transition = 'left 0.5s ease';
                 currentCircle.style.left = '50px';
-                currentCircle.style.transform = 'scale(1)';
                 
                 // Через короткое время убираем transition
                 setTimeout(() => {
                     if (currentCircle) {
                         currentCircle.style.transition = '';
                     }
-                }, 300);
+                }, 500);
             }
 
             function updateProgress() {
