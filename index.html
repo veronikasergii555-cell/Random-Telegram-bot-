@@ -1,172 +1,633 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Капча-игра</title>
-<style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f0f0f0;
-    user-select: none;
-    touch-action: none;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фруктовая капча</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  h2 {
-    color: #2c3e50;
-    margin: 20px 0;
-  }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            touch-action: none;
+        }
 
-  .game-area {
-    position: relative;
-    width: 90%;
-    max-width: 400px;
-    height: 60vh;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    background-color: #fff;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    padding: 10px;
-  }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding: 25px;
+        }
 
-  .fruit {
-    width: 20%;
-    max-width: 70px;
-    margin: 10px;
-    text-align: center;
-    font-size: 30px;
-    cursor: grab;
-    position: absolute;
-    user-select: none;
-  }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
 
-  .basket {
-    width: 40%;
-    height: 80px;
-    border: 2px dashed #333;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    margin-top: auto;
-    background-color: #fefefe;
-    position: relative;
-  }
+        .header h1 {
+            color: #2d3436;
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
 
-  .message {
-    font-size: 20px;
-    color: green;
-    margin-top: 15px;
-  }
-</style>
+        .header p {
+            color: #636e72;
+            font-size: 16px;
+        }
+
+        .instructions {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #6c5ce7;
+        }
+
+        .instructions p {
+            color: #2d3436;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions i {
+            color: #6c5ce7;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            border-radius: 15px;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 2px dashed #dfe6e9;
+        }
+
+        .baskets-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 10px;
+            background-color: #e3f2fd;
+            border-bottom: 2px solid #bbdefb;
+        }
+
+        .basket {
+            width: 100px;
+            height: 90px;
+            background-color: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 3px solid #bbdefb;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .basket.highlight {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+            background-color: #f1f8e9;
+        }
+
+        .basket-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .basket-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #37474f;
+            background-color: #e3f2fd;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .fruits-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .fruit {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: grab;
+            position: absolute;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 10;
+        }
+
+        .fruit:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+        }
+
+        .fruit.placed {
+            cursor: default;
+            opacity: 0.7;
+            transform: scale(0.9);
+        }
+
+        .fruit.apple { background-color: #ffebee; color: #d32f2f; }
+        .fruit.banana { background-color: #fffde7; color: #fbc02d; }
+        .fruit.grapes { background-color: #f3e5f5; color: #7b1fa2; }
+        .fruit.orange { background-color: #fff3e0; color: #f57c00; }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            min-height: 55px;
+        }
+
+        .message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            opacity: 1;
+        }
+
+        .message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            opacity: 1;
+        }
+
+        .message.info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            opacity: 1;
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .reset-btn:hover {
+            background-color: #5b4fcf;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(108, 92, 231, 0.4);
+        }
+
+        .counter {
+            text-align: center;
+            margin-top: 10px;
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .game-area {
+                height: 320px;
+            }
+            
+            .basket {
+                width: 85px;
+                height: 80px;
+            }
+            
+            .fruit {
+                width: 60px;
+                height: 60px;
+                font-size: 35px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-gamepad"></i> Фруктовая капча</h1>
+            <p>Перетащите фрукты в соответствующие корзины</p>
+        </div>
+        
+        <div class="instructions">
+            <p><i class="fas fa-info-circle"></i> Перетащите каждый фрукт в корзину с таким же фруктом</p>
+        </div>
+        
+        <div class="game-area">
+            <div class="baskets-container">
+                <div class="basket" data-type="🍎" id="apple-basket">
+                    <div class="basket-icon">🍎</div>
+                    <div class="basket-label">Для яблок</div>
+                </div>
+                <div class="basket" data-type="🍌" id="banana-basket">
+                    <div class="basket-icon">🍌</div>
+                    <div class="basket-label">Для бананов</div>
+                </div>
+                <div class="basket" data-type="🍇" id="grapes-basket">
+                    <div class="basket-icon">🍇</div>
+                    <div class="basket-label">Для винограда</div>
+                </div>
+            </div>
+            
+            <div class="fruits-container" id="fruits-container">
+                <div class="fruit apple" data-type="🍎" id="apple1">🍎</div>
+                <div class="fruit banana" data-type="🍌" id="banana1">🍌</div>
+                <div class="fruit grapes" data-type="🍇" id="grapes1">🍇</div>
+                <div class="fruit apple" data-type="🍎" id="apple2">🍎</div>
+                <div class="fruit orange" data-type="🍊" id="orange1">🍊</div>
+                <div class="fruit banana" data-type="🍌" id="banana2">🍌</div>
+            </div>
+        </div>
+        
+        <div class="counter">
+            Размещено: <span id="placed-count">0</span> из <span id="total-count">6</span> фруктов
+        </div>
+        
+        <div class="message" id="message">
+            Перетащите фрукты в корзины
+        </div>
+        
+        <button class="reset-btn" id="reset-btn">
+            <i class="fas fa-redo-alt"></i> Начать заново
+        </button>
+    </div>
 
-<h2>Перетащи фрукты в свои корзины</h2>
-
-<div class="game-area" id="gameArea">
-  <div class="fruit" data-type="🍎" style="top: 20px; left: 20px;">🍎</div>
-  <div class="fruit" data-type="🍌" style="top: 20px; left: 120px;">🍌</div>
-  <div class="fruit" data-type="🍇" style="top: 20px; left: 220px;">🍇</div>
-
-  <div class="basket" data-type="🍎" style="bottom: 10px; left: 10px; position: absolute;">🍎 Корзина</div>
-  <div class="basket" data-type="🍌" style="bottom: 10px; right: 10px; position: absolute;">🍌 Корзина</div>
-</div>
-
-<div class="message" id="message"></div>
-
-<script>
-  const fruits = document.querySelectorAll('.fruit');
-  const baskets = document.querySelectorAll('.basket');
-  const gameArea = document.getElementById('gameArea');
-  const message = document.getElementById('message');
-
-  let dragging = null;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  fruits.forEach(fruit => {
-    fruit.addEventListener('touchstart', e => {
-      dragging = fruit;
-      const touch = e.touches[0];
-      const rect = fruit.getBoundingClientRect();
-      offsetX = touch.clientX - rect.left;
-      offsetY = touch.clientY - rect.top;
-    });
-
-    fruit.addEventListener('touchmove', e => {
-      if (!dragging) return;
-      e.preventDefault();
-      const touch = e.touches[0];
-      const x = touch.clientX - offsetX - gameArea.getBoundingClientRect().left;
-      const y = touch.clientY - offsetY - gameArea.getBoundingClientRect().top;
-      dragging.style.left = `${x}px`;
-      dragging.style.top = `${y}px`;
-    });
-
-    fruit.addEventListener('touchend', e => {
-      if (!dragging) return;
-      let placed = false;
-      const fruitRect = dragging.getBoundingClientRect();
-
-      baskets.forEach(basket => {
-        const basketRect = basket.getBoundingClientRect();
-        if (
-          fruitRect.left + fruitRect.width/2 > basketRect.left &&
-          fruitRect.left + fruitRect.width/2 < basketRect.right &&
-          fruitRect.top + fruitRect.height/2 > basketRect.top &&
-          fruitRect.top + fruitRect.height/2 < basketRect.bottom
-        ) {
-          // проверка типа
-          if (dragging.dataset.type === basket.dataset.type) {
-            dragging.style.left = `${basket.offsetLeft + basket.offsetWidth/2 - dragging.offsetWidth/2}px`;
-            dragging.style.top = `${basket.offsetTop - dragging.offsetHeight/2}px`;
-            dragging.setAttribute('data-placed', 'true');
-            placed = true;
-          }
-        }
-      });
-
-      if (!placed) {
-        // возвращаем обратно
-        dragging.style.top = dragging.dataset.originalTop;
-        dragging.style.left = dragging.dataset.originalLeft;
-      }
-
-      dragging = null;
-
-      // проверка победы
-      checkWin();
-    });
-
-    // сохраняем начальную позицию
-    fruit.dataset.originalTop = fruit.style.top;
-    fruit.dataset.originalLeft = fruit.style.left;
-  });
-
-  function checkWin() {
-    let allPlaced = true;
-    fruits.forEach(fruit => {
-      if (fruit.dataset.type !== fruit.dataset.placed) {
-        if (fruit.dataset.placed !== "true") allPlaced = false;
-      }
-    });
-
-    if (allPlaced) {
-      message.textContent = "🎉 Подтверждено!";
-    }
-  }
-</script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Элементы DOM
+            const fruits = document.querySelectorAll('.fruit');
+            const baskets = document.querySelectorAll('.basket');
+            const fruitsContainer = document.getElementById('fruits-container');
+            const message = document.getElementById('message');
+            const resetBtn = document.getElementById('reset-btn');
+            const placedCountEl = document.getElementById('placed-count');
+            const totalCountEl = document.getElementById('total-count');
+            
+            // Переменные состояния
+            let draggedFruit = null;
+            let initialPositions = new Map();
+            let placedFruits = 0;
+            const totalFruits = fruits.length;
+            let isCompleted = false;
+            
+            // Инициализация
+            totalCountEl.textContent = totalFruits;
+            updateMessage('info', 'Перетащите фрукты в корзины');
+            
+            // Сохраняем начальные позиции фруктов
+            fruits.forEach(fruit => {
+                initialPositions.set(fruit.id, {
+                    left: fruit.style.left || `${getRandomPosition().x}px`,
+                    top: fruit.style.top || `${getRandomPosition().y}px`
+                });
+                
+                // Устанавливаем случайные начальные позиции
+                if (!fruit.style.left || !fruit.style.top) {
+                    const pos = getRandomPosition();
+                    fruit.style.left = `${pos.x}px`;
+                    fruit.style.top = `${pos.y}px`;
+                }
+                
+                // Добавляем обработчики событий для мыши
+                fruit.addEventListener('mousedown', startDrag);
+                
+                // Добавляем обработчики событий для сенсорных устройств
+                fruit.addEventListener('touchstart', startDragTouch, { passive: false });
+            });
+            
+            // Обработчики для корзин
+            baskets.forEach(basket => {
+                basket.addEventListener('dragover', allowDrop);
+                basket.addEventListener('drop', handleDrop);
+                
+                // Для сенсорных устройств
+                basket.addEventListener('touchmove', handleTouchMove, { passive: false });
+                basket.addEventListener('touchend', handleTouchEnd);
+            });
+            
+            // Обработчик кнопки сброса
+            resetBtn.addEventListener('click', resetGame);
+            
+            // Функции
+            function getRandomPosition() {
+                const containerWidth = fruitsContainer.offsetWidth;
+                const containerHeight = fruitsContainer.offsetHeight;
+                const fruitSize = 70;
+                
+                return {
+                    x: Math.floor(Math.random() * (containerWidth - fruitSize)),
+                    y: Math.floor(Math.random() * (containerHeight - fruitSize))
+                };
+            }
+            
+            function startDrag(e) {
+                e.preventDefault();
+                draggedFruit = this;
+                
+                // Поднимаем элемент над остальными
+                draggedFruit.style.zIndex = '1000';
+                
+                // Сохраняем смещение курсора относительно элемента
+                const shiftX = e.clientX - draggedFruit.getBoundingClientRect().left;
+                const shiftY = e.clientY - draggedFruit.getBoundingClientRect().top;
+                
+                function moveAt(pageX, pageY) {
+                    const containerRect = fruitsContainer.getBoundingClientRect();
+                    
+                    // Ограничиваем перемещение в пределах контейнера
+                    let newX = pageX - shiftX - containerRect.left;
+                    let newY = pageY - shiftY - containerRect.top;
+                    
+                    // Границы контейнера
+                    const maxX = containerRect.width - draggedFruit.offsetWidth;
+                    const maxY = containerRect.height - draggedFruit.offsetHeight;
+                    
+                    newX = Math.max(0, Math.min(newX, maxX));
+                    newY = Math.max(0, Math.min(newY, maxY));
+                    
+                    draggedFruit.style.left = newX + 'px';
+                    draggedFruit.style.top = newY + 'px';
+                }
+                
+                function onMouseMove(e) {
+                    moveAt(e.pageX, e.pageY);
+                    
+                    // Подсвечиваем соответствующую корзину
+                    const fruitType = draggedFruit.dataset.type;
+                    baskets.forEach(basket => {
+                        if (basket.dataset.type === fruitType) {
+                            basket.classList.add('highlight');
+                        } else {
+                            basket.classList.remove('highlight');
+                        }
+                    });
+                }
+                
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    
+                    // Убираем подсветку со всех корзин
+                    baskets.forEach(basket => basket.classList.remove('highlight'));
+                    
+                    // Проверяем, попал ли фрукт в корзину
+                    checkBasketDrop();
+                    
+                    // Возвращаем нормальный z-index
+                    if (!draggedFruit.classList.contains('placed')) {
+                        draggedFruit.style.zIndex = '10';
+                    }
+                    
+                    draggedFruit = null;
+                }
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+            
+            // Функции для сенсорных устройств
+            function startDragTouch(e) {
+                e.preventDefault();
+                draggedFruit = this;
+                
+                // Поднимаем элемент над остальными
+                draggedFruit.style.zIndex = '1000';
+                
+                const touch = e.touches[0];
+                const shiftX = touch.clientX - draggedFruit.getBoundingClientRect().left;
+                const shiftY = touch.clientY - draggedFruit.getBoundingClientRect().top;
+                
+                function moveAt(pageX, pageY) {
+                    const containerRect = fruitsContainer.getBoundingClientRect();
+                    
+                    let newX = pageX - shiftX - containerRect.left;
+                    let newY = pageY - shiftY - containerRect.top;
+                    
+                    const maxX = containerRect.width - draggedFruit.offsetWidth;
+                    const maxY = containerRect.height - draggedFruit.offsetHeight;
+                    
+                    newX = Math.max(0, Math.min(newX, maxX));
+                    newY = Math.max(0, Math.min(newY, maxY));
+                    
+                    draggedFruit.style.left = newX + 'px';
+                    draggedFruit.style.top = newY + 'px';
+                }
+                
+                function onTouchMove(e) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    moveAt(touch.pageX, touch.pageY);
+                    
+                    // Подсвечиваем соответствующую корзину
+                    const fruitType = draggedFruit.dataset.type;
+                    baskets.forEach(basket => {
+                        if (basket.dataset.type === fruitType) {
+                            basket.classList.add('highlight');
+                        } else {
+                            basket.classList.remove('highlight');
+                        }
+                    });
+                }
+                
+                function onTouchEnd() {
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                    
+                    // Убираем подсветку со всех корзин
+                    baskets.forEach(basket => basket.classList.remove('highlight'));
+                    
+                    // Проверяем, попал ли фрукт в корзину
+                    checkBasketDrop();
+                    
+                    // Возвращаем нормальный z-index
+                    if (!draggedFruit.classList.contains('placed')) {
+                        draggedFruit.style.zIndex = '10';
+                    }
+                    
+                    draggedFruit = null;
+                }
+                
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+            }
+            
+            function handleTouchEnd() {
+                // Обработка для сенсорных устройств
+            }
+            
+            function allowDrop(e) {
+                e.preventDefault();
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault();
+                if (draggedFruit) {
+                    const fruitType = draggedFruit.dataset.type;
+                    const basketType = this.dataset.type;
+                    
+                    if (fruitType === basketType) {
+                        placeFruitInBasket(draggedFruit, this);
+                    }
+                }
+            }
+            
+            function checkBasketDrop() {
+                if (!draggedFruit) return;
+                
+                const fruitRect = draggedFruit.getBoundingClientRect();
+                const fruitType = draggedFruit.dataset.type;
+                let placed = false;
+                
+                baskets.forEach(basket => {
+                    const basketRect = basket.getBoundingClientRect();
+                    
+                    // Проверяем пересечение фрукта с корзиной
+                    if (
+                        fruitRect.left < basketRect.right &&
+                        fruitRect.right > basketRect.left &&
+                        fruitRect.top < basketRect.bottom &&
+                        fruitRect.bottom > basketRect.top
+                    ) {
+                        if (fruitType === basket.dataset.type) {
+                            placeFruitInBasket(draggedFruit, basket);
+                            placed = true;
+                        }
+                    }
+                });
+                
+                if (!placed && !draggedFruit.classList.contains('placed')) {
+                    // Если фрукт не размещен, возвращаем на исходную позицию
+                    const initialPos = initialPositions.get(draggedFruit.id);
+                    draggedFruit.style.left = initialPos.left;
+                    draggedFruit.style.top = initialPos.top;
+                }
+            }
+            
+            function placeFruitInBasket(fruit, basket) {
+                if (fruit.classList.contains('placed')) return;
+                
+                // Помечаем фрукт как размещенный
+                fruit.classList.add('placed');
+                fruit.style.cursor = 'default';
+                
+                // Размещаем фрукт над корзиной
+                const basketRect = basket.getBoundingClientRect();
+                const containerRect = fruitsContainer.getBoundingClientRect();
+                
+                const x = basketRect.left - containerRect.left + (basketRect.width / 2) - (fruit.offsetWidth / 2);
+                const y = basketRect.top - containerRect.top - 20;
+                
+                fruit.style.left = `${x}px`;
+                fruit.style.top = `${y}px`;
+                
+                // Увеличиваем счетчик размещенных фруктов
+                placedFruits++;
+                placedCountEl.textContent = placedFruits;
+                
+                // Проверяем, все ли фрукты размещены
+                checkCompletion();
+            }
+            
+            function checkCompletion() {
+                if (placedFruits === totalFruits && !isCompleted) {
+                    isCompleted = true;
+                    updateMessage('success', '🎉 Поздравляем! Капча пройдена!');
+                    
+                    // Здесь можно добавить код для отправки результата в Telegram Mini App
+                    // Например: Telegram.WebApp.sendData(JSON.stringify({captcha_passed: true}));
+                    
+                    // Через 2 секунды можно автоматически продолжить
+                    setTimeout(() => {
+                        // Telegram.WebApp.close();
+                        // или другой код для перехода дальше
+                    }, 2000);
+                }
+            }
+            
+            function updateMessage(type, text) {
+                message.className = 'message';
+                message.classList.add(type);
+                message.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${text}`;
+            }
+            
+            function resetGame() {
+                // Сбрасываем все фрукты
+                fruits.forEach(fruit => {
+                    fruit.classList.remove('placed');
+                    fruit.style.cursor = 'grab';
+                    
+                    const initialPos = initialPositions.get(fruit.id);
+                    fruit.style.left = initialPos.left;
+                    fruit.style.top = initialPos.top;
+                    fruit.style.zIndex = '10';
+                });
+                
+                // Сбрасываем счетчики
+                placedFruits = 0;
+                placedCountEl.textContent = placedFruits;
+                isCompleted = false;
+                
+                // Обновляем сообщение
+                updateMessage('info', 'Перетащите фрукты в корзины');
+            }
+        });
+    </script>
 </body>
 </html>
-
