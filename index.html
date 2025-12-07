@@ -7,40 +7,38 @@
     <title>Загрузка...</title>
     <style>
         /* Стили для всего экрана */
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: #000; /* чёрный фон */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      color: #fff;
-    }
+        body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+  }
 
-    /* Кружок загрузки */
-    .loader {
-      border: 8px solid #f3f3f3; /* светлый обод */
-      border-top: 8px solid #FFD700; /* желтый цвет для анимации */
-      border-radius: 50%;
-      width: 80px;
-      height: 80px;
-      animation: spin 1.5s linear infinite;
-      margin-bottom: 30px;
-    }
+  /* Современный желтый loader */
+  .loader {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(#FFD700 0% 25%, #444 25% 100%);
+    animation: rotate 1s linear infinite;
+    margin-bottom: 30px;
+  }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
-    /* Текст снизу */
-    .loading-text {
-      font-size: 18px;
-      color: #FFD700; /* желтый текст */
-    }
+  .loading-text {
+    font-size: 18px;
+    color: #FFD700;
+    text-align: center;
+  }
     </style>
 </head>
 <body>
