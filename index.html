@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -21,7 +21,6 @@
             align-items: center;
             min-height: 100vh;
             padding: 10px;
-            overflow: hidden;
         }
 
         .game-container {
@@ -43,7 +42,6 @@
             justify-content: space-around;
             align-items: center;
             padding: 10px;
-            border-bottom: 2px solid #bbdefb;
         }
 
         .basket {
@@ -75,11 +73,21 @@
             color: #333;
         }
 
-        /* Нижняя часть - фрукты */
-        .fruits-area {
+        /* Область для фруктов - теперь она ВКЛЮЧАЕТ и корзины! */
+        .game-area {
             height: 380px;
             position: relative;
-            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        /* Зона, куда можно бросать фрукты - ВСЯ ВЕРХНЯЯ ЧАСТЬ */
+        .drop-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120px; /* Такая же высота как у baskets */
+            z-index: 5;
         }
 
         .fruit {
@@ -105,7 +113,7 @@
 
         .fruit.placed {
             cursor: default;
-            opacity: 0.6;
+            opacity: 0.7;
             transform: scale(0.9);
         }
 
@@ -144,7 +152,10 @@
             </div>
         </div>
 
-        <div class="fruits-area" id="fruits-area">
+        <div class="game-area" id="game-area">
+            <!-- Невидимая зона для дропа над корзинами -->
+            <div class="drop-zone" id="drop-zone"></div>
+            
             <!-- Фрукты добавляются скриптом -->
         </div>
 
@@ -155,18 +166,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const fruitsArea = document.getElementById('fruits-area');
+            const gameArea = document.getElementById('game-area');
+            const dropZone = document.getElementById('drop-zone');
             const message = document.getElementById('message');
             const baskets = document.querySelectorAll('.basket');
             
-            // Создаем фрукты
+            // Создаем фрукты - начинаем их НИЖЕ корзин
             const fruits = [
-                { type: '🍎', class: 'apple', id: 'apple1', x: 50, y: 50 },
-                { type: '🍌', class: 'banana', id: 'banana1', x: 150, y: 50 },
-                { type: '🍇', class: 'grapes', id: 'grapes1', x: 250, y: 50 },
-                { type: '🍎', class: 'apple', id: 'apple2', x: 100, y: 150 },
-                { type: '🍌', class: 'banana', id: 'banana2', x: 200, y: 150 },
-                { type: '🍊', class: 'orange', id: 'orange1', x: 50, y: 250 }
+                { type: '🍎', class: 'apple', id: 'apple1', x: 50, y: 150 },
+                { type: '🍌', class: 'banana', id: 'banana1', x: 150, y: 150 },
+                { type: '🍇', class: 'grapes', id: 'grapes1', x: 250, y: 150 },
+                { type: '🍎', class: 'apple', id: 'apple2', x: 100, y: 250 },
+                { type: '🍌', class: 'banana', id: 'banana2', x: 200, y: 250 },
+                { type: '🍊', class: 'orange', id: 'orange1', x: 50, y: 300 }
             ];
             
             let draggedFruit = null;
@@ -187,6 +199,8 @@
                 fruit.dataset.originalX = fruitData.x;
                 fruit.dataset.originalY = fruitData.y;
                 
+                gameArea.appendChild(fruit);
+                
                 // События для мыши
                 fruit.addEventListener('mousedown', startDrag);
                 
@@ -195,45 +209,43 @@
                     e.preventDefault();
                     startDrag(e);
                 });
-                
-                fruitsArea.appendChild(fruit);
             });
             
             function startDrag(e) {
-                const fruit = e.target;
-                if (fruit.classList.contains('placed')) return;
+                const fruit = e.target.closest('.fruit');
+                if (!fruit || fruit.classList.contains('placed')) return;
                 
                 draggedFruit = fruit;
-                const rect = fruit.getBoundingClientRect();
                 
-                // Координаты для мыши
+                // Получаем позицию клика внутри фрукта
                 let clientX, clientY;
                 if (e.type === 'mousedown') {
                     clientX = e.clientX;
                     clientY = e.clientY;
                 } else {
-                    // Для touch событий
                     clientX = e.touches[0].clientX;
                     clientY = e.touches[0].clientY;
                 }
                 
-                // Смещение курсора внутри элемента
-                const offsetX = clientX - rect.left;
-                const offsetY = clientY - rect.top;
+                const fruitRect = fruit.getBoundingClientRect();
+                const offsetX = clientX - fruitRect.left;
+                const offsetY = clientY - fruitRect.top;
                 
                 function moveAt(x, y) {
-                    // Ограничиваем перемещение в пределах игровой области
-                    const areaRect = fruitsArea.getBoundingClientRect();
+                    // ВАЖНО: разрешаем движение ВЕЗДЕ, включая зону корзин
+                    const areaRect = gameArea.getBoundingClientRect();
                     
                     let newX = x - offsetX - areaRect.left;
                     let newY = y - offsetY - areaRect.top;
                     
-                    // Границы области
+                    // Границы ВСЕЙ игровой области
                     const maxX = areaRect.width - 60;
                     const maxY = areaRect.height - 60;
                     
+                    // Разрешаем движение даже в отрицательные координаты по Y
+                    // чтобы фрукты могли заходить в зону корзин
                     newX = Math.max(0, Math.min(newX, maxX));
-                    newY = Math.max(0, Math.min(newY, maxY));
+                    newY = Math.max(-60, Math.min(newY, maxY)); // -60 чтобы могли заходить вверх
                     
                     fruit.style.left = `${newX}px`;
                     fruit.style.top = `${newY}px`;
@@ -256,7 +268,7 @@
                 function onMouseUp() {
                     if (!draggedFruit) return;
                     
-                    // Проверяем окончание перетаскивания
+                    // Проверяем, попали ли в корзину
                     checkDrop();
                     
                     // Убираем обработчики
@@ -265,10 +277,10 @@
                     document.removeEventListener('touchmove', onMouseMove);
                     document.removeEventListener('touchend', onMouseUp);
                     
-                    draggedFruit = null;
-                    
-                    // Убираем подсветку всех корзин
+                    // Убираем подсветку
                     baskets.forEach(basket => basket.classList.remove('highlight'));
+                    
+                    draggedFruit = null;
                 }
                 
                 // Добавляем обработчики
@@ -349,20 +361,24 @@
                 fruit.classList.add('placed');
                 fruit.style.cursor = 'default';
                 
-                // Позиционируем над корзиной
+                // Позиционируем прямо НАД корзиной (внутри голубой зоны)
                 const basketRect = basket.getBoundingClientRect();
-                const areaRect = fruitsArea.getBoundingClientRect();
+                const areaRect = gameArea.getBoundingClientRect();
                 
-                // Центрируем над корзиной
+                // Центрируем над корзиной, но в пределах видимой области
                 const x = basketRect.left - areaRect.left + (basketRect.width / 2) - 30;
-                const y = basketRect.top - areaRect.top - 10;
+                const y = basketRect.top - areaRect.top + 20; // Немного ниже верхнего края корзины
                 
                 fruit.style.left = `${x}px`;
                 fruit.style.top = `${y}px`;
                 fruit.style.transition = 'all 0.3s ease';
+                fruit.style.zIndex = '20'; // Чтобы был поверх корзины
                 
                 // Увеличиваем счетчик
                 placedCount++;
+                
+                // Обновляем сообщение
+                message.textContent = `Размещено: ${placedCount} из ${totalFruits}`;
                 
                 // Проверяем завершение
                 if (placedCount === totalFruits) {
@@ -378,12 +394,10 @@
                             }));
                         }
                     }, 1000);
-                } else {
-                    message.textContent = `Размещено: ${placedCount} из ${totalFruits}`;
                 }
             }
             
-            // Обновляем сообщение
+            // Начальное сообщение
             message.textContent = `Размещено: ${placedCount} из ${totalFruits}`;
         });
     </script>
