@@ -47,7 +47,7 @@
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
         }
 
-        /* Блоки с дорожками */
+        /* Блок с тремя дорожками */
         .track-block {
             background: rgba(255, 215, 0, 0.05);
             border-radius: 15px;
@@ -130,24 +130,44 @@
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.3),
                         inset 0 0 15px rgba(0, 0, 0, 0.8);
             z-index: 5;
+            transition: all 0.3s ease;
         }
 
         .target-icon {
             font-size: 24px;
             opacity: 0.3;
             filter: brightness(0.5);
+            transition: all 0.3s ease;
         }
 
-        /* Анимация поглощения */
-        @keyframes absorb {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(0.5); opacity: 0.5; }
-            100% { transform: scale(0); opacity: 0; }
+        /* Когда кружок в квадрате */
+        .track.completed .fruit-circle {
+            left: calc(100% - 110px) !important; /* Позиция внутри квадрата */
+            transform: scale(0.8);
+            border-color: #00FF00;
+            background-color: #002200;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6),
+                        inset 0 0 15px rgba(0, 255, 0, 0.3);
+            transition: left 0.5s ease, transform 0.5s ease;
         }
 
-        .fruit-circle.absorbed {
-            animation: absorb 0.5s ease forwards;
-            pointer-events: none;
+        .track.completed .target-square {
+            border-color: #00FF00;
+            background-color: #003300;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5),
+                        inset 0 0 20px rgba(0, 0, 0, 0.9);
+        }
+
+        .track.completed .target-icon {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .track.completed .track-line {
+            background: linear-gradient(90deg, 
+                rgba(0, 255, 0, 0.3), 
+                rgba(0, 255, 0, 0.6), 
+                rgba(0, 255, 0, 0.3));
         }
 
         /* Подсветка квадрата при приближении */
@@ -196,25 +216,6 @@
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* Успешно завершенные дорожки */
-        .track.completed .fruit-circle {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .track.completed .track-line {
-            background: linear-gradient(90deg, 
-                rgba(0, 255, 0, 0.3), 
-                rgba(0, 255, 0, 0.6), 
-                rgba(0, 255, 0, 0.3));
-        }
-
-        .track.completed .target-square {
-            border-color: #00FF00;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4),
-                        inset 0 0 10px rgba(0, 0, 0, 0.9);
-        }
-
         /* Эффект пульсации для активного блока */
         @keyframes pulse {
             0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
@@ -234,8 +235,8 @@
             <div class="title">ПЕРЕТАЩИ ФРУКТ</div>
         </div>
 
-        <!-- Блок 1 -->
-        <div class="track-block" id="block1">
+        <!-- Блок с тремя дорожками -->
+        <div class="track-block" id="trackBlock">
             <!-- Дорожка 1: Яблоко -->
             <div class="track" id="track1" data-fruit="🍎">
                 <div class="track-line"></div>
@@ -270,81 +271,9 @@
             </div>
         </div>
 
-        <!-- Блок 2 -->
-        <div class="track-block" id="block2">
-            <!-- Дорожка 4: Апельсин -->
-            <div class="track" id="track4" data-fruit="🍊">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle4">
-                    <div class="fruit">🍊</div>
-                </div>
-                <div class="target-square" id="target4">
-                    <div class="target-icon">🍊</div>
-                </div>
-            </div>
-
-            <!-- Дорожка 5: Клубника -->
-            <div class="track" id="track5" data-fruit="🍓">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle5">
-                    <div class="fruit">🍓</div>
-                </div>
-                <div class="target-square" id="target5">
-                    <div class="target-icon">🍓</div>
-                </div>
-            </div>
-
-            <!-- Дорожка 6: Вишня -->
-            <div class="track" id="track6" data-fruit="🍒">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle6">
-                    <div class="fruit">🍒</div>
-                </div>
-                <div class="target-square" id="target6">
-                    <div class="target-icon">🍒</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Блок 3 -->
-        <div class="track-block" id="block3">
-            <!-- Дорожка 7: Лимон -->
-            <div class="track" id="track7" data-fruit="🍋">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle7">
-                    <div class="fruit">🍋</div>
-                </div>
-                <div class="target-square" id="target7">
-                    <div class="target-icon">🍋</div>
-                </div>
-            </div>
-
-            <!-- Дорожка 8: Ананас -->
-            <div class="track" id="track8" data-fruit="🍍">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle8">
-                    <div class="fruit">🍍</div>
-                </div>
-                <div class="target-square" id="target8">
-                    <div class="target-icon">🍍</div>
-                </div>
-            </div>
-
-            <!-- Дорожка 9: Персик -->
-            <div class="track" id="track9" data-fruit="🍑">
-                <div class="track-line"></div>
-                <div class="fruit-circle" id="circle9">
-                    <div class="fruit">🍑</div>
-                </div>
-                <div class="target-square" id="target9">
-                    <div class="target-icon">🍑</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Прогресс -->
         <div class="progress-container">
-            <div class="progress-text" id="progressText">0/9 завершено</div>
+            <div class="progress-text" id="progressText">0/3 завершено</div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -358,11 +287,10 @@
             const progressFill = document.getElementById('progressFill');
             
             let completedTracks = 0;
-            const totalTracks = 9;
+            const totalTracks = 3;
             let isDragging = false;
             let currentCircle = null;
             let currentTrack = null;
-            let currentBlock = null;
             let currentTarget = null;
             let trackLine = null;
             let trackRect = null;
@@ -375,10 +303,6 @@
                 const target = track.querySelector('.target-square');
                 
                 // Сохраняем начальную позицию кружочка
-                const circleRect = circle.getBoundingClientRect();
-                const trackRect = track.getBoundingClientRect();
-                
-                // Позиция кружочка (50px от левого края трека)
                 circle.dataset.initialLeft = '50';
                 circle.style.left = '50px';
                 
@@ -399,14 +323,12 @@
                 
                 currentCircle = e.target.closest('.fruit-circle');
                 currentTrack = currentCircle.closest('.track');
-                currentBlock = currentTrack.closest('.track-block');
                 
                 // Если дорожка уже завершена - не даем тащить
                 if (currentTrack.classList.contains('completed')) return;
                 
                 isDragging = true;
                 currentCircle.classList.add('dragging');
-                currentBlock.classList.add('active');
                 
                 currentTarget = currentTrack.querySelector('.target-square');
                 trackLine = currentTrack.querySelector('.track-line');
@@ -476,9 +398,6 @@
                 
                 isDragging = false;
                 currentCircle.classList.remove('dragging');
-                if (currentBlock) {
-                    currentBlock.classList.remove('active');
-                }
                 
                 // Получаем текущую позицию кружочка
                 const circleRect = currentCircle.getBoundingClientRect();
@@ -487,8 +406,8 @@
                 // Проверяем, достиг ли кружочек квадрата
                 // Квадрат считается достигнутым, когда кружочек заходит в его область
                 const isAtTarget = 
-                    circleRect.left >= targetRect.left - 20 &&
-                    circleRect.right <= targetRect.right + 20;
+                    circleRect.left >= targetRect.left - 10 &&
+                    circleRect.right <= targetRect.right + 10;
                 
                 if (isAtTarget) {
                     // Успех! Кружочек достигает квадрата
@@ -505,7 +424,6 @@
                 
                 currentCircle = null;
                 currentTrack = null;
-                currentBlock = null;
                 currentTarget = null;
                 trackLine = null;
             }
@@ -529,13 +447,19 @@
             }
 
             function completeTrack() {
-                // Анимация поглощения кружочка
-                currentCircle.classList.add('absorbed');
-                
                 // Помечаем дорожку как завершенную
-                setTimeout(() => {
-                    currentTrack.classList.add('completed');
-                }, 500);
+                currentTrack.classList.add('completed');
+                
+                // Фиксируем кружочек в квадрате
+                // Рассчитываем позицию внутри квадрата
+                const targetRect = currentTarget.getBoundingClientRect();
+                const trackRect = currentTrack.getBoundingClientRect();
+                const targetCenterX = targetRect.left - trackRect.left + targetRect.width / 2 - currentCircle.offsetWidth / 2;
+                
+                // Плавно перемещаем кружочек в центр квадрата
+                currentCircle.style.transition = 'left 0.5s ease, transform 0.5s ease';
+                currentCircle.style.left = `${targetCenterX}px`;
+                currentCircle.style.transform = 'scale(0.8)';
                 
                 // Увеличиваем счетчик завершенных дорожек
                 completedTracks++;
@@ -561,6 +485,7 @@
                 // Возвращаем кружочек на начальную позицию
                 currentCircle.style.transition = 'left 0.3s ease';
                 currentCircle.style.left = '50px';
+                currentCircle.style.transform = 'scale(1)';
                 
                 // Через короткое время убираем transition
                 setTimeout(() => {
