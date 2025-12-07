@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Розыгрыш</title>
+<style>
+  body { font-family: sans-serif; text-align: center; padding: 50px; }
+  #status { font-size: 18px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<h2>Проверка участия...</h2>
+<div id="status">Пожалуйста, подождите ⏳</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+
+async function checkParticipation() {
+    const userId = tg.initDataUnsafe.user.id; // ID пользователя Telegram
+    const raffleId = new URLSearchParams(window.location.search).get('raffle_id');
+
+    try {
+        const response = await fetch(`https://your-server.com/check-participation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, raffle_id: raffleId, tg_data: tg.initData })
+        });
+
+        const result = await response.json();
+
+        const statusEl = document.getElementById('status');
+
+        if(result.allowed) {
+            statusEl.innerHTML = "✅ Вы успешно участвуете в розыгрыше!";
+        } else {
+            statusEl.innerHTML = "❌ Для участия подпишитесь на нужные каналы.";
+        }
+    } catch(e) {
+        document.getElementById('status').innerHTML = "⚠️ Ошибка проверки. Попробуйте снова.";
+        console.error(e);
+    }
+}
+
+// Запускаем проверку при загрузке страницы
+checkParticipation();
+</script>
+</body>
+</html>
