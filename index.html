@@ -1,9 +1,9 @@
-        <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Капча</title>
+    <title>Капча: Свайп фрукт в корзину</title>
     <style>
         * {
             margin: 0;
@@ -15,211 +15,335 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 10px;
+            padding: 20px;
+            touch-action: none;
         }
 
         .game-container {
             width: 100%;
             max-width: 400px;
-            height: 500px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            position: relative;
+            padding: 25px;
+            text-align: center;
         }
 
-        /* Верхняя часть - корзины */
-        .baskets {
-            height: 120px;
-            background: #e3f2fd;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px;
+        h1 {
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 24px;
         }
 
-        .basket {
-            width: 90px;
-            height: 80px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #bbdefb;
-            position: relative;
+        .instructions {
+            color: #636e72;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.4;
         }
 
-        .basket.highlight {
-            border-color: #4CAF50;
-            background: #f1f8e9;
-        }
-
-        .basket-icon {
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-
-        .basket-label {
-            font-size: 12px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        /* Область для фруктов - теперь она ВКЛЮЧАЕТ и корзины! */
-        .game-area {
-            height: 380px;
-            position: relative;
+        .task {
             background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #6c5ce7;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3436;
         }
 
-        /* Зона, куда можно бросать фрукты - ВСЯ ВЕРХНЯЯ ЧАСТЬ */
-        .drop-zone {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .game-area {
+            position: relative;
             width: 100%;
-            height: 120px; /* Такая же высота как у baskets */
-            z-index: 5;
+            height: 250px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #dfe6e9;
+            overflow: hidden;
         }
 
         .fruit {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
-            cursor: grab;
+            font-size: 40px;
+            cursor: pointer;
             z-index: 10;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
+            left: 50px;
+            top: 90px;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .fruit:active {
-            cursor: grabbing;
+        .fruit.active {
             transform: scale(1.1);
-            z-index: 100;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
-        .fruit.placed {
-            cursor: default;
-            opacity: 0.7;
-            transform: scale(0.9);
-        }
+        .apple { background: #ffebee; color: #d32f2f; }
+        .banana { background: #fffde7; color: #fbc02d; }
+        .grapes { background: #f3e5f5; color: #7b1fa2; }
 
-        .apple { background: #ffebee; }
-        .banana { background: #fffde7; }
-        .grapes { background: #f3e5f5; }
-        .orange { background: #fff3e0; }
-
-        /* Сообщение */
-        .message {
+        .basket {
             position: absolute;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            text-align: center;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            right: 50px;
+            top: 75px;
+            border: 3px solid #bbdefb;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .basket-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .basket-label {
             font-size: 14px;
-            color: #666;
-            padding: 5px;
+            font-weight: bold;
+            color: #37474f;
+        }
+
+        .swipe-line {
+            position: absolute;
+            height: 4px;
+            background: #6c5ce7;
+            border-radius: 2px;
+            pointer-events: none;
+            opacity: 0;
+            transform-origin: left center;
+            z-index: 5;
+        }
+
+        .arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #6c5ce7;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .message.default {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #636e72;
+        }
+
+        .counter-item {
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .restart-btn:hover {
+            background: #5b4fcf;
+            transform: translateY(-2px);
+        }
+
+        .demo-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #78909c;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <div class="baskets">
-            <div class="basket" data-type="🍎" id="apple-basket">
-                <div class="basket-icon">🍎</div>
-                <div class="basket-label">Яблоки</div>
-            </div>
-            <div class="basket" data-type="🍌" id="banana-basket">
-                <div class="basket-icon">🍌</div>
-                <div class="basket-label">Бананы</div>
-            </div>
-            <div class="basket" data-type="🍇" id="grapes-basket">
-                <div class="basket-icon">🍇</div>
-                <div class="basket-label">Виноград</div>
-            </div>
+        <h1>Фруктовая капча</h1>
+        
+        <div class="instructions">
+            Проведите пальцем (или мышкой) от фрукта к корзине
+        </div>
+
+        <div class="task" id="task">
+            Проведите от <span id="current-fruit">🍎</span> к корзине
+        </div>
+
+        <div class="counter">
+            <div class="counter-item">Успешно: <span id="success-count">0</span>/3</div>
+            <div class="counter-item">Осталось: <span id="remaining-count">3</span></div>
         </div>
 
         <div class="game-area" id="game-area">
-            <!-- Невидимая зона для дропа над корзинами -->
-            <div class="drop-zone" id="drop-zone"></div>
-            
-            <!-- Фрукты добавляются скриптом -->
+            <div class="fruit apple" id="fruit">🍎</div>
+            <div class="basket" id="basket">
+                <div class="basket-icon">🍎</div>
+                <div class="basket-label">Корзина</div>
+            </div>
+            <div class="swipe-line" id="swipe-line"></div>
+            <div class="arrow" id="arrow"></div>
         </div>
 
-        <div class="message" id="message">
-            Перетащите фрукты в нужные корзины
+        <div class="demo-text">
+            Нажмите на фрукт и проведите к корзине
         </div>
+
+        <div class="message default" id="message">
+            Нажмите на фрукт и проведите к корзине
+        </div>
+
+        <button class="restart-btn" id="restart-btn">
+            Начать заново
+        </button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const gameArea = document.getElementById('game-area');
-            const dropZone = document.getElementById('drop-zone');
+            const fruit = document.getElementById('fruit');
+            const basket = document.getElementById('basket');
+            const swipeLine = document.getElementById('swipe-line');
+            const arrow = document.getElementById('arrow');
             const message = document.getElementById('message');
-            const baskets = document.querySelectorAll('.basket');
-            
-            // Создаем фрукты - начинаем их НИЖЕ корзин
-            const fruits = [
-                { type: '🍎', class: 'apple', id: 'apple1', x: 50, y: 150 },
-                { type: '🍌', class: 'banana', id: 'banana1', x: 150, y: 150 },
-                { type: '🍇', class: 'grapes', id: 'grapes1', x: 250, y: 150 },
-                { type: '🍎', class: 'apple', id: 'apple2', x: 100, y: 250 },
-                { type: '🍌', class: 'banana', id: 'banana2', x: 200, y: 250 },
-                { type: '🍊', class: 'orange', id: 'orange1', x: 50, y: 300 }
-            ];
-            
-            let draggedFruit = null;
-            let placedCount = 0;
-            const totalFruits = fruits.length;
-            
-            // Добавляем фрукты на поле
-            fruits.forEach(fruitData => {
-                const fruit = document.createElement('div');
-                fruit.className = `fruit ${fruitData.class}`;
-                fruit.id = fruitData.id;
-                fruit.dataset.type = fruitData.type;
-                fruit.textContent = fruitData.type;
-                fruit.style.left = `${fruitData.x}px`;
-                fruit.style.top = `${fruitData.y}px`;
+            const task = document.getElementById('task');
+            const currentFruitSpan = document.getElementById('current-fruit');
+            const successCountEl = document.getElementById('success-count');
+            const remainingCountEl = document.getElementById('remaining-count');
+            const restartBtn = document.getElementById('restart-btn');
+
+            // Настройки игры
+            const fruits = ['🍎', '🍌', '🍇'];
+            let currentFruitIndex = 0;
+            let successCount = 0;
+            const requiredSuccess = 3;
+            let isSwiping = false;
+            let startX = 0, startY = 0;
+            let currentFruit = fruits[0];
+
+            // Обновляем отображение
+            function updateDisplay() {
+                currentFruit = fruits[currentFruitIndex];
+                fruit.textContent = currentFruit;
+                currentFruitSpan.textContent = currentFruit;
+                basket.querySelector('.basket-icon').textContent = currentFruit;
                 
-                // Сохраняем начальную позицию
-                fruit.dataset.originalX = fruitData.x;
-                fruit.dataset.originalY = fruitData.y;
+                // Меняем цвет фрукта
+                fruit.className = 'fruit ';
+                if (currentFruit === '🍎') fruit.classList.add('apple');
+                if (currentFruit === '🍌') fruit.classList.add('banana');
+                if (currentFruit === '🍇') fruit.classList.add('grapes');
                 
-                gameArea.appendChild(fruit);
+                successCountEl.textContent = successCount;
+                remainingCountEl.textContent = requiredSuccess - successCount;
                 
-                // События для мыши
-                fruit.addEventListener('mousedown', startDrag);
+                // Обновляем задание
+                task.textContent = `Проведите от ${currentFruit} к корзине`;
                 
-                // События для тач-устройств
-                fruit.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    startDrag(e);
-                });
-            });
-            
-            function startDrag(e) {
-                const fruit = e.target.closest('.fruit');
-                if (!fruit || fruit.classList.contains('placed')) return;
+                // Сбрасываем сообщение
+                message.className = 'message default';
+                message.innerHTML = `Нажмите на ${currentFruit} и проведите к корзине`;
+            }
+
+            // Получаем координаты центра элемента
+            function getCenter(element) {
+                const rect = element.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            // Начало свайпа
+            function startSwipe(e) {
+                e.preventDefault();
                 
-                draggedFruit = fruit;
+                const fruitCenter = getCenter(fruit);
+                startX = fruitCenter.x;
+                startY = fruitCenter.y;
                 
-                // Получаем позицию клика внутри фрукта
+                isSwiping = true;
+                fruit.classList.add('active');
+                
+                // Показываем линию свайпа
+                swipeLine.style.left = startX + 'px';
+                swipeLine.style.top = startY + 'px';
+                swipeLine.style.width = '0';
+                swipeLine.style.opacity = '1';
+                
+                // Показываем стрелку
+                arrow.style.left = startX + 'px';
+                arrow.style.top = startY + 'px';
+                arrow.style.opacity = '1';
+                
+                // Меняем сообщение
+                message.textContent = 'Ведите к корзине...';
+            }
+
+            // Движение при свайпе
+            function moveSwipe(e) {
+                if (!isSwiping) return;
+                
                 let clientX, clientY;
-                if (e.type === 'mousedown') {
+                if (e.type === 'mousemove') {
                     clientX = e.clientX;
                     clientY = e.clientY;
                 } else {
@@ -227,178 +351,147 @@
                     clientY = e.touches[0].clientY;
                 }
                 
-                const fruitRect = fruit.getBoundingClientRect();
-                const offsetX = clientX - fruitRect.left;
-                const offsetY = clientY - fruitRect.top;
+                // Вычисляем расстояние и угол
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
                 
-                function moveAt(x, y) {
-                    // ВАЖНО: разрешаем движение ВЕЗДЕ, включая зону корзин
-                    const areaRect = gameArea.getBoundingClientRect();
-                    
-                    let newX = x - offsetX - areaRect.left;
-                    let newY = y - offsetY - areaRect.top;
-                    
-                    // Границы ВСЕЙ игровой области
-                    const maxX = areaRect.width - 60;
-                    const maxY = areaRect.height - 60;
-                    
-                    // Разрешаем движение даже в отрицательные координаты по Y
-                    // чтобы фрукты могли заходить в зону корзин
-                    newX = Math.max(0, Math.min(newX, maxX));
-                    newY = Math.max(-60, Math.min(newY, maxY)); // -60 чтобы могли заходить вверх
-                    
-                    fruit.style.left = `${newX}px`;
-                    fruit.style.top = `${newY}px`;
-                    
-                    // Проверяем, находимся ли мы над корзиной
-                    checkBasketOverlap(fruit);
-                }
+                // Обновляем линию
+                swipeLine.style.width = distance + 'px';
+                swipeLine.style.transform = `rotate(${angle}deg)`;
                 
-                function onMouseMove(e) {
-                    if (!draggedFruit) return;
-                    
-                    if (e.type === 'mousemove') {
-                        moveAt(e.clientX, e.clientY);
-                    } else if (e.type === 'touchmove') {
-                        e.preventDefault();
-                        moveAt(e.touches[0].clientX, e.touches[0].clientY);
-                    }
-                }
-                
-                function onMouseUp() {
-                    if (!draggedFruit) return;
-                    
-                    // Проверяем, попали ли в корзину
-                    checkDrop();
-                    
-                    // Убираем обработчики
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    document.removeEventListener('touchmove', onMouseMove);
-                    document.removeEventListener('touchend', onMouseUp);
-                    
-                    // Убираем подсветку
-                    baskets.forEach(basket => basket.classList.remove('highlight'));
-                    
-                    draggedFruit = null;
-                }
-                
-                // Добавляем обработчики
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-                document.addEventListener('touchmove', onMouseMove, { passive: false });
-                document.addEventListener('touchend', onMouseUp);
+                // Обновляем стрелку
+                arrow.style.left = clientX + 'px';
+                arrow.style.top = clientY + 'px';
+                arrow.style.transform = `rotate(${angle + 90}deg)`;
             }
-            
-            function checkBasketOverlap(fruit) {
-                if (!fruit) return;
+
+            // Завершение свайпа
+            function endSwipe(e) {
+                if (!isSwiping) return;
                 
-                const fruitRect = fruit.getBoundingClientRect();
-                const fruitCenterX = fruitRect.left + fruitRect.width / 2;
-                const fruitCenterY = fruitRect.top + fruitRect.height / 2;
+                isSwiping = false;
+                fruit.classList.remove('active');
                 
-                // Убираем подсветку со всех корзин
-                baskets.forEach(basket => basket.classList.remove('highlight'));
-                
-                // Проверяем каждую корзину
-                baskets.forEach(basket => {
-                    const basketRect = basket.getBoundingClientRect();
-                    
-                    // Если центр фрукта находится в пределах корзины
-                    if (
-                        fruitCenterX > basketRect.left &&
-                        fruitCenterX < basketRect.right &&
-                        fruitCenterY > basketRect.top &&
-                        fruitCenterY < basketRect.bottom
-                    ) {
-                        // Подсвечиваем, если корзина правильная
-                        if (fruit.dataset.type === basket.dataset.type) {
-                            basket.classList.add('highlight');
-                        }
-                    }
-                });
-            }
-            
-            function checkDrop() {
-                if (!draggedFruit) return;
-                
-                const fruitRect = draggedFruit.getBoundingClientRect();
-                const fruitCenterX = fruitRect.left + fruitRect.width / 2;
-                const fruitCenterY = fruitRect.top + fruitRect.height / 2;
-                let placed = false;
-                
-                // Проверяем каждую корзину
-                baskets.forEach(basket => {
-                    const basketRect = basket.getBoundingClientRect();
-                    
-                    // Если центр фрукта в корзине
-                    if (
-                        fruitCenterX > basketRect.left &&
-                        fruitCenterX < basketRect.right &&
-                        fruitCenterY > basketRect.top &&
-                        fruitCenterY < basketRect.bottom
-                    ) {
-                        // Если корзина правильная
-                        if (draggedFruit.dataset.type === basket.dataset.type) {
-                            // Размещаем фрукт
-                            placeFruitInBasket(draggedFruit, basket);
-                            placed = true;
-                        }
-                    }
-                });
-                
-                // Если не разместили - возвращаем на место
-                if (!placed && !draggedFruit.classList.contains('placed')) {
-                    draggedFruit.style.left = `${draggedFruit.dataset.originalX}px`;
-                    draggedFruit.style.top = `${draggedFruit.dataset.originalY}px`;
+                let clientX, clientY;
+                if (e.type === 'mouseup') {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                } else {
+                    clientX = e.changedTouches[0].clientX;
+                    clientY = e.changedTouches[0].clientY;
                 }
-            }
-            
-            function placeFruitInBasket(fruit, basket) {
-                if (fruit.classList.contains('placed')) return;
                 
-                // Помечаем как размещенный
-                fruit.classList.add('placed');
-                fruit.style.cursor = 'default';
-                
-                // Позиционируем прямо НАД корзиной (внутри голубой зоны)
+                // Проверяем, попали ли в корзину
                 const basketRect = basket.getBoundingClientRect();
-                const areaRect = gameArea.getBoundingClientRect();
+                const isInBasket = 
+                    clientX >= basketRect.left &&
+                    clientX <= basketRect.right &&
+                    clientY >= basketRect.top &&
+                    clientY <= basketRect.bottom;
                 
-                // Центрируем над корзиной, но в пределах видимой области
-                const x = basketRect.left - areaRect.left + (basketRect.width / 2) - 30;
-                const y = basketRect.top - areaRect.top + 20; // Немного ниже верхнего края корзины
+                // Прячем линию и стрелку
+                swipeLine.style.opacity = '0';
+                arrow.style.opacity = '0';
                 
-                fruit.style.left = `${x}px`;
-                fruit.style.top = `${y}px`;
-                fruit.style.transition = 'all 0.3s ease';
-                fruit.style.zIndex = '20'; // Чтобы был поверх корзины
-                
-                // Увеличиваем счетчик
-                placedCount++;
-                
-                // Обновляем сообщение
-                message.textContent = `Размещено: ${placedCount} из ${totalFruits}`;
-                
-                // Проверяем завершение
-                if (placedCount === totalFruits) {
-                    message.textContent = '✅ Капча пройдена!';
-                    message.style.color = '#4CAF50';
-                    message.style.fontWeight = 'bold';
+                if (isInBasket) {
+                    // Успех!
+                    successCount++;
+                    message.className = 'message success';
+                    message.innerHTML = `✅ Отлично! ${currentFruit} в корзине!`;
                     
-                    // Отправляем результат в Telegram Mini App
+                    // Анимация успеха
+                    fruit.style.transition = 'all 0.5s ease';
+                    fruit.style.left = (basket.offsetLeft + 15) + 'px';
+                    fruit.style.top = (basket.offsetTop + 15) + 'px';
+                    fruit.style.transform = 'scale(0.5)';
+                    
                     setTimeout(() => {
-                        if (window.Telegram && window.Telegram.WebApp) {
-                            window.Telegram.WebApp.sendData(JSON.stringify({
-                                captcha_passed: true
-                            }));
+                        if (successCount >= requiredSuccess) {
+                            // Капча пройдена
+                            message.innerHTML = '🎉 Капча пройдена! Все фрукты в корзинах!';
+                            
+                            // Отправляем результат в Telegram Mini App
+                            setTimeout(() => {
+                                if (window.Telegram && window.Telegram.WebApp) {
+                                    window.Telegram.WebApp.sendData(JSON.stringify({
+                                        captcha_passed: true
+                                    }));
+                                }
+                            }, 1500);
+                        } else {
+                            // Следующий фрукт
+                            currentFruitIndex = (currentFruitIndex + 1) % fruits.length;
+                            resetFruitPosition();
+                            updateDisplay();
                         }
-                    }, 1000);
+                    }, 800);
+                } else {
+                    // Не попали в корзину
+                    message.className = 'message error';
+                    message.innerHTML = '❌ Проведите точнее к корзине';
+                    
+                    // Возвращаем фрукт на место
+                    setTimeout(() => {
+                        resetFruitPosition();
+                    }, 500);
                 }
             }
-            
-            // Начальное сообщение
-            message.textContent = `Размещено: ${placedCount} из ${totalFruits}`;
+
+            // Сброс позиции фрукта
+            function resetFruitPosition() {
+                fruit.style.transition = 'all 0.3s ease';
+                fruit.style.left = '50px';
+                fruit.style.top = '90px';
+                fruit.style.transform = 'scale(1)';
+                
+                setTimeout(() => {
+                    fruit.style.transition = '';
+                }, 300);
+            }
+
+            // Перезапуск игры
+            function restartGame() {
+                currentFruitIndex = 0;
+                successCount = 0;
+                resetFruitPosition();
+                updateDisplay();
+                
+                // Вибрация при перезапуске (если поддерживается)
+                if (navigator.vibrate) navigator.vibrate(50);
+            }
+
+            // Настройка обработчиков событий
+            function setupEventListeners() {
+                // Для мыши
+                fruit.addEventListener('mousedown', startSwipe);
+                document.addEventListener('mousemove', moveSwipe);
+                document.addEventListener('mouseup', endSwipe);
+                
+                // Для сенсорных устройств
+                fruit.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    startSwipe(e);
+                }, { passive: false });
+                
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    moveSwipe(e);
+                }, { passive: false });
+                
+                document.addEventListener('touchend', endSwipe);
+                
+                // Кнопка перезапуска
+                restartBtn.addEventListener('click', restartGame);
+                
+                // Предотвращаем контекстное меню на фрукте
+                fruit.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            // Инициализация
+            updateDisplay();
+            setupEventListeners();
         });
     </script>
 </body>
