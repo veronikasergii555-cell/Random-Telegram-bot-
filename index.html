@@ -1,147 +1,172 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Капча: Фрукты в корзину</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: #000;
-      font-family: Arial, sans-serif;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Капча-игра</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f0f0;
+    user-select: none;
+    touch-action: none;
+  }
 
-    h2 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      color: #FFD700;
-    }
+  h2 {
+    color: #2c3e50;
+    margin: 20px 0;
+  }
 
-    #game-container {
-      display: flex;
-      justify-content: space-around;
-      width: 90%;
-      margin-top: 20px;
-    }
+  .game-area {
+    position: relative;
+    width: 90%;
+    max-width: 400px;
+    height: 60vh;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 10px;
+  }
 
-    .basket {
-      width: 150px;
-      height: 150px;
-      border: 3px dashed #FFD700;
-      border-radius: 15px;
-      text-align: center;
-      padding-top: 10px;
-      font-weight: bold;
-      font-size: 18px;
-    }
+  .fruit {
+    width: 20%;
+    max-width: 70px;
+    margin: 10px;
+    text-align: center;
+    font-size: 30px;
+    cursor: grab;
+    position: absolute;
+    user-select: none;
+  }
 
-    .fruits-container {
-      display: flex;
-      gap: 20px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+  .basket {
+    width: 40%;
+    height: 80px;
+    border: 2px dashed #333;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    margin-top: auto;
+    background-color: #fefefe;
+    position: relative;
+  }
 
-    .fruit {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      cursor: grab;
-      user-select: none;
-      border: 2px solid #FFD700;
-    }
-
-    .success {
-      color: #00FF00;
-      font-size: 20px;
-      margin-top: 20px;
-    }
-  </style>
+  .message {
+    font-size: 20px;
+    color: green;
+    margin-top: 15px;
+  }
+</style>
 </head>
 <body>
-  <h2>Перетащи фрукты в правильную корзину</h2>
-  <div id="game-container">
-    <div class="basket" data-type="🍎">Яблоки</div>
-    <div class="basket" data-type="🍌">Бананы</div>
-    <div class="basket" data-type="🍇">Виноград</div>
-  </div>
 
-  <div class="fruits-container">
-    <div class="fruit" draggable="true" data-type="🍎">🍎</div>
-    <div class="fruit" draggable="true" data-type="🍌">🍌</div>
-    <div class="fruit" draggable="true" data-type="🍇">🍇</div>
-    <div class="fruit" draggable="true" data-type="🍎">🍎</div>
-    <div class="fruit" draggable="true" data-type="🍌">🍌</div>
-    <div class="fruit" draggable="true" data-type="🍇">🍇</div>
-  </div>
+<h2>Перетащи фрукты в свои корзины</h2>
 
-  <div class="success" id="success-msg" style="display:none;">
-    ✅ Капча пройдена!
-  </div>
+<div class="game-area" id="gameArea">
+  <div class="fruit" data-type="🍎" style="top: 20px; left: 20px;">🍎</div>
+  <div class="fruit" data-type="🍌" style="top: 20px; left: 120px;">🍌</div>
+  <div class="fruit" data-type="🍇" style="top: 20px; left: 220px;">🍇</div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+  <div class="basket" data-type="🍎" style="bottom: 10px; left: 10px; position: absolute;">🍎 Корзина</div>
+  <div class="basket" data-type="🍌" style="bottom: 10px; right: 10px; position: absolute;">🍌 Корзина</div>
+</div>
 
-    const fruits = document.querySelectorAll('.fruit');
-    const baskets = document.querySelectorAll('.basket');
-    let correctDrops = 0;
-    const totalFruits = fruits.length;
+<div class="message" id="message"></div>
 
+<script>
+  const fruits = document.querySelectorAll('.fruit');
+  const baskets = document.querySelectorAll('.basket');
+  const gameArea = document.getElementById('gameArea');
+  const message = document.getElementById('message');
+
+  let dragging = null;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  fruits.forEach(fruit => {
+    fruit.addEventListener('touchstart', e => {
+      dragging = fruit;
+      const touch = e.touches[0];
+      const rect = fruit.getBoundingClientRect();
+      offsetX = touch.clientX - rect.left;
+      offsetY = touch.clientY - rect.top;
+    });
+
+    fruit.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const x = touch.clientX - offsetX - gameArea.getBoundingClientRect().left;
+      const y = touch.clientY - offsetY - gameArea.getBoundingClientRect().top;
+      dragging.style.left = `${x}px`;
+      dragging.style.top = `${y}px`;
+    });
+
+    fruit.addEventListener('touchend', e => {
+      if (!dragging) return;
+      let placed = false;
+      const fruitRect = dragging.getBoundingClientRect();
+
+      baskets.forEach(basket => {
+        const basketRect = basket.getBoundingClientRect();
+        if (
+          fruitRect.left + fruitRect.width/2 > basketRect.left &&
+          fruitRect.left + fruitRect.width/2 < basketRect.right &&
+          fruitRect.top + fruitRect.height/2 > basketRect.top &&
+          fruitRect.top + fruitRect.height/2 < basketRect.bottom
+        ) {
+          // проверка типа
+          if (dragging.dataset.type === basket.dataset.type) {
+            dragging.style.left = `${basket.offsetLeft + basket.offsetWidth/2 - dragging.offsetWidth/2}px`;
+            dragging.style.top = `${basket.offsetTop - dragging.offsetHeight/2}px`;
+            dragging.setAttribute('data-placed', 'true');
+            placed = true;
+          }
+        }
+      });
+
+      if (!placed) {
+        // возвращаем обратно
+        dragging.style.top = dragging.dataset.originalTop;
+        dragging.style.left = dragging.dataset.originalLeft;
+      }
+
+      dragging = null;
+
+      // проверка победы
+      checkWin();
+    });
+
+    // сохраняем начальную позицию
+    fruit.dataset.originalTop = fruit.style.top;
+    fruit.dataset.originalLeft = fruit.style.left;
+  });
+
+  function checkWin() {
+    let allPlaced = true;
     fruits.forEach(fruit => {
-      fruit.addEventListener('dragstart', dragStart);
+      if (fruit.dataset.type !== fruit.dataset.placed) {
+        if (fruit.dataset.placed !== "true") allPlaced = false;
+      }
     });
 
-    baskets.forEach(basket => {
-      basket.addEventListener('dragover', dragOver);
-      basket.addEventListener('drop', dropFruit);
-    });
-
-    function dragStart(event) {
-      event.dataTransfer.setData('text', event.target.dataset.type);
-      event.dataTransfer.setData('id', event.target.innerText + Math.random());
-      event.target.classList.add('dragging');
+    if (allPlaced) {
+      message.textContent = "🎉 Подтверждено!";
     }
+  }
+</script>
 
-    function dragOver(event) {
-      event.preventDefault();
-    }
-
-    function dropFruit(event) {
-      event.preventDefault();
-      const fruitType = event.dataTransfer.getData('text');
-      const fruitId = event.dataTransfer.getData('id');
-      const basketType = event.currentTarget.dataset.type;
-
-      if(fruitType === basketType) {
-        correctDrops++;
-        event.currentTarget.style.borderColor = "#00FF00"; // зелёная рамка
-        // Удаляем фрукт из контейнера
-        const fruitElements = Array.from(document.querySelectorAll('.fruit'));
-        const fruitElement = fruitElements.find(f => f.dataset.type === fruitType);
-        if(fruitElement) fruitElement.remove();
-      } else {
-        alert("Неправильная корзина! Попробуй ещё раз.");
-      }
-
-      if(correctDrops === totalFruits) {
-        document.getElementById('success-msg').style.display = 'block';
-        // Отправляем данные в Telegram бот
-        tg.sendData(JSON.stringify({captcha_passed: true}));
-      }
-    }
-  </script>
 </body>
 </html>
+
